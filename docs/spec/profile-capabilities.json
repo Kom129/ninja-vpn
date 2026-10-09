@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-10-03",
+  "purpose": "planning_metadata_not_executable_configuration",
+  "not_a_runtime_support_guarantee": true,
+  "profiles": [
+    {
+      "id": "vless-reality-tcp-vision",
+      "protocol": "VLESS",
+      "transport": "RAW/TCP",
+      "security": "REALITY + Vision",
+      "outer_network": "TCP",
+      "planned_role": "candidate_main",
+      "validation_note": "sing-box or Xray; validate exact flow and fields",
+      "source": "https://xtls.github.io/en/config/outbounds/vless.html",
+      "field_test_status": "NOT_RUN"
+    },
+    {
+      "id": "vless-xhttp-tls-h2",
+      "protocol": "VLESS",
+      "transport": "XHTTP/HTTP2",
+      "security": "TLS",
+      "outer_network": "TCP",
+      "planned_role": "candidate_reserve",
+      "validation_note": "Xray adapter when selected sing-box build lacks XHTTP",
+      "source": "https://github.com/XTLS/Xray-core/discussions/4113",
+      "field_test_status": "NOT_RUN"
+    },
+    {
+      "id": "naive-h2",
+      "protocol": "Naive",
+      "transport": "HTTP2 CONNECT",
+      "security": "TLS",
+      "outer_network": "TCP",
+      "planned_role": "priority_extension",
+      "validation_note": "Windows build with required Cronet dependency; UDP requires compatible extension",
+      "source": "https://sing-box.sagernet.org/configuration/outbound/naive/",
+      "field_test_status": "NOT_RUN"
+    },
+    {
+      "id": "hysteria2",
+      "protocol": "Hysteria 2",
+      "transport": "QUIC",
+      "security": "TLS",
+      "outer_network": "UDP",
+      "planned_role": "candidate_alternative",
+      "validation_note": "Test server/client interoperability; Windows Mimic is not assumed",
+      "source": "https://v2.hysteria.network/docs/advanced/Full-Client-Config/",
+      "field_test_status": "NOT_RUN"
+    },
+    {
+      "id": "tuic-v5",
+      "protocol": "TUIC v5",
+      "transport": "QUIC in common implementations",
+      "security": "TLS",
+      "outer_network": "UDP",
+      "planned_role": "later_if_needed",
+      "validation_note": "Compatible protocol version and parameters; binary versions may differ",
+      "source": "https://github.com/tuic-protocol/tuic/blob/master/SPEC.md",
+      "field_test_status": "NOT_RUN"
+    },
+    {
+      "id": "amneziawg",
+      "protocol": "AmneziaWG",
+      "transport": "UDP tunnel",
+      "security": "WireGuard-derived",
+      "outer_network": "UDP",
+      "planned_role": "later_module",
+      "validation_note": "AWG 3.1 docs; pin actual Windows implementation and peer compatibility",
+      "source": "https://docs.amnezia.org/documentation/amnezia-wg/",
+      "field_test_status": "NOT_RUN"
+    },
+    {
+      "id": "wireguard",
+      "protocol": "WireGuard",
+      "transport": "UDP tunnel",
+      "security": "WireGuard",
+      "outer_network": "UDP",
+      "planned_role": "compatibility",
+      "validation_note": "No built-in obfuscation or TCP mode",
+      "source": "https://www.wireguard.com/known-limitations/",
+      "field_test_status": "NOT_RUN"
+    },
+    {
+      "id": "shadowsocks-2022",
+      "protocol": "Shadowsocks 2022",
+      "transport": "TCP/UDP",
+      "security": "AEAD",
+      "outer_network": "TCP and UDP separately",
+      "planned_role": "compatibility",
+      "validation_note": "Matching cipher/key; no blanket browser camouflage claim",
+      "source": "https://shadowsocks.org/doc/sip022.html",
+      "field_test_status": "NOT_RUN"
+    },
+    {
+      "id": "trojan-tls",
+      "protocol": "Trojan",
+      "transport": "TCP",
+      "security": "TLS",
+      "outer_network": "TCP",
+      "planned_role": "compatibility",
+      "validation_note": "Validate UDP ASSOCIATE behavior over tunnel",
+      "source": "https://trojan-gfw.github.io/trojan/protocol",
+      "field_test_status": "NOT_RUN"
+    },
+    {
+      "id": "openvpn",
+      "protocol": "OpenVPN",
+      "transport": "TCP or UDP",
+      "security": "OpenVPN security settings",
+      "outer_network": "profile-dependent",
+      "planned_role": "later_compatibility",
+      "validation_note": "Validate actual corporate profile and Windows module",
+      "source": "https://openvpn.net/community-docs/community-articles/openvpn-2-6-manual.html",
+      "field_test_status": "NOT_RUN"
+    }
+  ]
+}

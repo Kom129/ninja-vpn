@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "prepared_on": "2026-10-03",
+  "language": "ru",
+  "status": "research_and_handoff_only",
+  "confirmed": {
+    "region": "Russia",
+    "primary_platform": "Windows",
+    "protocol_scope": [
+      "VLESS",
+      "additional VPN/proxy protocols"
+    ],
+    "modes": [
+      "whole_device",
+      "selected_apps",
+      "selected_browser"
+    ],
+    "multiple_profiles": true,
+    "design_reference": "design/selected-glass.png",
+    "animation_reference": "design/ninja-connection-reference.html",
+    "animation_concept": "small female ninja carries data; trail becomes wave; thread snaps on failure",
+    "feedback": "large character and rough motion rejected; latest reference reduced and smoothed"
+  },
+  "proposed_not_field_validated": {
+    "ui": [
+      "Tauri 2",
+      "React",
+      "TypeScript"
+    ],
+    "native_control": "Rust + Windows service",
+    "routing_owner_candidate": "sing-box",
+    "optional_engine": "Xray for capability gaps",
+    "tun_owner_count": 1,
+    "fail_closed_mechanism": "Windows Filtering Platform",
+    "initial_protocol_profiles": [
+      "vless-reality-tcp-vision",
+      "vless-xhttp-tls-h2",
+      "hysteria2"
+    ],
+    "priority_extension": "naive-h2",
+    "later_module": "AmneziaWG",
+    "motion_reference": {
+      "speed": 1.3,
+      "amplitude_px": 8,
+      "character_scale": 0.62
+    }
+  },
+  "unknown": [
+    "product_name",
+    "repository",
+    "minimum_windows_build",
+    "architectures",
+    "server_endpoints",
+    "credentials",
+    "server_budget",
+    "distribution_model",
+    "license_for_own_code",
+    "dns_policy_for_selected_apps",
+    "lan_exceptions",
+    "pre_login_autoconnect"
+  ],
+  "actual_vpn_tests_performed": false,
+  "contains_credentials": false
+}

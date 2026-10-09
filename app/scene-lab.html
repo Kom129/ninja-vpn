@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Раскадровка сцены ниндзя</title>
+    <style>
+      body { margin: 0; padding: 16px; background: #e4f2fa; font: 13px system-ui, sans-serif; color: #33505f; }
+      h2 { margin: 18px 0 8px; font-size: 15px; }
+      .strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      figure { margin: 0; background: #f4fbff; border-radius: 8px; padding: 4px; }
+      canvas { width: 100%; display: block; }
+      figcaption { text-align: center; font-size: 11px; color: #6b8797; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/ninja/lab.ts"></script>
+  </body>
+</html>

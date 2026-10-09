@@ -1,0 +1,71 @@
+{
+  "format_version": 1,
+  "prepared_on": "2026-10-03",
+  "files": [
+    {
+      "path": "00-START-HERE.md",
+      "bytes": 3650,
+      "sha256": "b352ebc2d92be3b453a98a8969f851299cc5d2d2c75e2d102683a2a4602dac93"
+    },
+    {
+      "path": "01-DEVELOPMENT-PROMPT.md",
+      "bytes": 12061,
+      "sha256": "5c34d638e11ebfc63dcaca15048e64de5b5ca19294078b9eabadd04ee671051d"
+    },
+    {
+      "path": "DECISIONS.md",
+      "bytes": 3567,
+      "sha256": "e7e60f54e20332cdef455396bd8000afc5ab7a0fba68923dbe0361e2c0e276e9"
+    },
+    {
+      "path": "design/DESIGN-BRIEF.md",
+      "bytes": 3278,
+      "sha256": "f444fbcb1e98b91a0bce9f24c9d0aaf5695a98956c2446acc331173a569bda61"
+    },
+    {
+      "path": "design/ninja-connection-reference.html",
+      "bytes": 36268,
+      "sha256": "8293e2892dce77e5b4390e1a8eb0a6873f8151968a7ce9d9b2d0bce6a0bf96c6"
+    },
+    {
+      "path": "design/selected-glass.png",
+      "bytes": 1536421,
+      "sha256": "d3d9b548df245d6313850754a3bdfb3bd6d70eb2b31db75f89a2bd07c18100ab"
+    },
+    {
+      "path": "research/REPORT.md",
+      "bytes": 50591,
+      "sha256": "2f7d26783601395e421626059007e36c2a664d158bf8cbb1342963429db27ea8"
+    },
+    {
+      "path": "research/sources.csv",
+      "bytes": 10058,
+      "sha256": "b94fee1ad8700b70a57f12ae76dcfa1d65c344c6b1df65ade8ca3ed31774c410"
+    },
+    {
+      "path": "spec/IMPLEMENTATION.md",
+      "bytes": 6277,
+      "sha256": "591f300ef698bb09c8ce2e98d1469653b6d1a6b851d35b418e6e4e6f010700b9"
+    },
+    {
+      "path": "spec/profile-capabilities.json",
+      "bytes": 4361,
+      "sha256": "9b438a48812b08e3e0873d8b8fe49d7816750870b3f42f9ddc2d7b61740f5dd5"
+    },
+    {
+      "path": "spec/PROJECT-CONTEXT.json",
+      "bytes": 1819,
+      "sha256": "1aa701a470a9d58ac03d30adb03482310aecf8cb7f76727291557b5dddc25389"
+    },
+    {
+      "path": "validation/test-cases.csv",
+      "bytes": 2813,
+      "sha256": "cbad9eed046213c9594492ba742e1586f0869ae7272b492cec17eb5c44eac9fa"
+    },
+    {
+      "path": "validation/TEST-PLAN.md",
+      "bytes": 3538,
+      "sha256": "35944d35dcb66c307ae77915941b977adb92a9a53ac8ef1a55699fe2767db3cb"
+    }
+  ]
+}

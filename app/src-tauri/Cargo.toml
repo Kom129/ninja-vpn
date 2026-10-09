@@ -1,0 +1,21 @@
+[package]
+name = "ninja-vpn"
+version = "1.0.0"
+description = "ninja-vpn — VPN-клиент со стеклянным окном и ниндзя"
+authors = ["KOM"]
+edition = "2024"
+
+[lib]
+# Суффикс _lib нужен, чтобы имя библиотеки не совпало с именем exe (особенность Windows).
+name = "ninja_vpn_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ninja-motor = { path = "../../motor" }
+tauri-plugin-single-instance = "2"

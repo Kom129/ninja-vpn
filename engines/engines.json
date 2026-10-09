@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "note": "Закреплённые версии сетевых ядер. Каждое распаковывается в engines/bin/<name>-<version>/, exe — путь внутри этой папки. Меняем версию только вместе с проверкой и записью в ЖУРНАЛ.md.",
+  "engines": [
+    {
+      "name": "sing-box",
+      "version": "1.14.2",
+      "channel": "stable",
+      "released": "2026-09-24",
+      "role": "основное ядро: всё, что умеет",
+      "platform": "windows-amd64",
+      "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.2/sing-box-1.14.2-windows-amd64.zip",
+      "sha256": "c2d8bfff918755808781dfdeeb8581b6c91eb3a243d9a7b55483cfc0c0684d32",
+      "exe": "sing-box-1.14.2-windows-amd64/sing-box.exe",
+      "license": "GPL-3.0-or-later",
+      "source": "https://github.com/SagerNet/sing-box/releases/tag/v1.14.2"
+    },
+    {
+      "name": "xray",
+      "version": "26.3.27",
+      "channel": "GitHub latest (не prerelease); более новые v26.x помечены prerelease",
+      "released": "2026-03-27",
+      "role": "только то, чего не умеет sing-box: XHTTP",
+      "platform": "windows-64",
+      "url": "https://github.com/XTLS/Xray-core/releases/download/v26.3.27/Xray-windows-64.zip",
+      "sha256": "d004c39288ce9ada487c6f398c7c545f7d749e44bdfdd59dbc9f865afba4e1ad",
+      "exe": "xray.exe",
+      "license": "MPL-2.0",
+      "source": "https://github.com/XTLS/Xray-core/releases/tag/v26.3.27"
+    }
+  ]
+}

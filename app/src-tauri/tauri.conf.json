@@ -1,0 +1,72 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "ninja-vpn",
+  "version": "1.0.0",
+  "identifier": "com.ninjavpn.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "ninja-vpn",
+        "width": 1180,
+        "height": 760,
+        "minWidth": 960,
+        "minHeight": 660,
+        "center": true,
+        "decorations": false,
+        "shadow": true,
+        "backgroundColor": "#e4f2fa"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis"
+    ],
+    "publisher": "KOM",
+    "shortDescription": "VPN-клиент со стеклянным окном и ниндзя",
+    "longDescription": "ninja-vpn: подписки и ключи VLESS, проверка скорости серверов, резерв и автовосстановление; режим «Только браузер».",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": {
+      "../../engines/engines.json": "engines/engines.json",
+      "../../engines/bin/sing-box-1.14.2/sing-box-1.14.2-windows-amd64/sing-box.exe": "engines/bin/sing-box-1.14.2/sing-box-1.14.2-windows-amd64/sing-box.exe",
+      "../../engines/bin/sing-box-1.14.2/sing-box-1.14.2-windows-amd64/LICENSE": "engines/bin/sing-box-1.14.2/sing-box-1.14.2-windows-amd64/LICENSE",
+      "../../engines/bin/xray-26.3.27/xray.exe": "engines/bin/xray-26.3.27/xray.exe",
+      "../../engines/bin/xray-26.3.27/LICENSE": "engines/bin/xray-26.3.27/LICENSE"
+    },
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": [
+          "English",
+          "Russian",
+          "Spanish",
+          "PortugueseBR",
+          "Turkish",
+          "SimpChinese",
+          "Farsi"
+        ],
+        "customLanguageFiles": {
+          "Farsi": "nsis/Farsi.nsh"
+        },
+        "displayLanguageSelector": false
+      }
+    }
+  }
+}

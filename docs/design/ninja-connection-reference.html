@@ -1,0 +1,533 @@
+<div id="vpn-ninja-preview" class="viz-dotted-background" aria-label="Ниндзя и нить подключения">
+  <style>
+    #vpn-ninja-preview { padding: 18px 10px 10px; color-scheme: light; }
+    #vpn-ninja-preview * { box-sizing: border-box; }
+    #vpn-ninja-preview .nf-window {
+      --nf-ink: #203b50; --nf-muted: #6c8598; --nf-aqua: #51d6df;
+      position: relative; isolation: isolate; max-width: 780px; margin: auto; overflow: hidden;
+      font: 400 14px/1.5 "Segoe UI", sans-serif; color: var(--nf-ink);
+      border: 1px solid #fff; border-radius: 24px;
+      background: radial-gradient(ellipse at 15% 20%, #f5fcff 0%, transparent 50%), radial-gradient(ellipse at 85% 80%, #c1e0ee 0%, transparent 52%), linear-gradient(125deg, #e4f2fa, #d7e9f3 55%, #edf7fb);
+      box-shadow: 0 15px 42px #294d681a, inset 0 0 0 2px #ffffff55;
+    }
+    #vpn-ninja-preview .nf-header { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 17px 24px; border-bottom: 1px solid #fff9; background: #ffffff24; }
+    #vpn-ninja-preview .nf-brand { font-size: 18px; font-weight: 500; letter-spacing: .02em; }
+    #vpn-ninja-preview .nf-status { font-size: 12px; display: flex; align-items: center; gap: 9px; color: #526f83; }
+    #vpn-ninja-preview .nf-led { width: 7px; height: 7px; border-radius: 50%; background: #8da9ba; box-shadow: 0 0 0 3px #ffffff70; transition: background .4s; }
+    #vpn-ninja-preview [data-state="running"] .nf-led { background: #45bacb; }
+    #vpn-ninja-preview [data-state="success"] .nf-led { background: #3dbf92; }
+    #vpn-ninja-preview [data-state="error"] .nf-led { background: #c47e85; }
+    #vpn-ninja-preview .nf-heading { padding: 27px 18px 0; text-align: center; }
+    #vpn-ninja-preview .nf-heading h2 { margin: 0; font: 500 25px/1.35 "Segoe UI", sans-serif; letter-spacing: -.02em; }
+    #vpn-ninja-preview .nf-heading p { margin: 7px 0 0; color: var(--nf-muted); font-size: 13px; }
+    #vpn-ninja-preview .nf-stage { height: 260px; margin: 0 36px; position: relative; }
+    #vpn-ninja-preview canvas { position: absolute; inset: 0; width: 100%; height: 260px; z-index: 2; pointer-events: none; }
+    #vpn-ninja-preview .nf-endpoint { position: absolute; top: 138px; width: 100px; text-align: center; z-index: 1; }
+    #vpn-ninja-preview .nf-start { left: -6px; }
+    #vpn-ninja-preview .nf-end { right: -6px; }
+    #vpn-ninja-preview .nf-orb { display: grid; place-items: center; width: 56px; height: 56px; margin: 0 auto 9px; border-radius: 50%; border: 1px solid #fff; background: radial-gradient(circle at 30% 20%, #fff9, #f6fdff44 70%), #e6f3fa; box-shadow: inset 0 0 0 3px #ffffff70, 0 7px 18px #477e9912; transition: box-shadow .5s; }
+    #vpn-ninja-preview .nf-orb svg { width: 25px !important; height: 25px !important; color: #418a9b; stroke-width: 1.5; }
+    #vpn-ninja-preview [data-state="success"] .nf-end .nf-orb { box-shadow: inset 0 0 0 3px #fff8, 0 0 27px #60e2df77; }
+    #vpn-ninja-preview .nf-name { font-size: 14px; font-weight: 500; }
+    #vpn-ninja-preview .nf-meta { margin-top: 2px; font-size: 11px; color: var(--nf-muted); }
+    #vpn-ninja-preview .nf-actions { display: flex; align-items: center; flex-direction: column; gap: 13px; padding: 0 20px 25px; }
+    #vpn-ninja-preview .nf-caption { margin: 0; min-height: 22px; text-align: center; color: #52738a; font-size: 13px; }
+    #vpn-ninja-preview [data-state="error"] .nf-caption { color: #a25f6a; }
+    #vpn-ninja-preview .nf-primary { min-height: 45px; min-width: 184px; padding: 10px 27px; border: 1px solid #fff; border-radius: 28px; color: #214358; background: linear-gradient(130deg, #ffffff73, #d6f3fa99); box-shadow: inset 0 0 0 3px #ffffff40, 0 5px 16px #58819b10; font: inherit; transition: background .2s, transform .2s; }
+    #vpn-ninja-preview .nf-primary:hover { background: #f0fdffe0; transform: translateY(-1px); }
+    #vpn-ninja-preview .nf-primary:focus-visible { outline: 2px solid #288caa; outline-offset: 4px; }
+    #vpn-ninja-preview .nf-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 13px 24px; border-top: 1px solid #fff8; background: #ffffff20; font-size: 12px; color: #67879a; }
+    #vpn-ninja-preview .nf-route-label { display: inline-flex; align-items: center; gap: 7px; }
+    #vpn-ninja-preview .nf-route-label svg { width: 15px; height: 15px; }
+    #vpn-ninja-preview .nf-demo-label { color: #6e8a9d; font-size: 11px; }
+    #vpn-ninja-preview .nf-controls { max-width: 780px; margin: 16px auto 0; display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
+    #vpn-ninja-preview .nf-field { flex: 1 1 190px; min-width: 0; }
+    @media(max-width:480px) {
+      #vpn-ninja-preview { padding: 10px 2px 6px; }
+      #vpn-ninja-preview .nf-stage { margin: 0 15px; }
+      #vpn-ninja-preview .nf-start { left: -14px; }
+      #vpn-ninja-preview .nf-end { right: -14px; }
+      #vpn-ninja-preview .nf-header { padding: 15px 17px; }
+      #vpn-ninja-preview .nf-heading h2 { font-size: 23px; }
+      #vpn-ninja-preview .nf-heading p { font-size: 12px; }
+      #vpn-ninja-preview .nf-heading { padding-top: 25px; }
+      #vpn-ninja-preview .nf-footer { padding: 13px 16px; }
+      #vpn-ninja-preview .nf-name { font-size: 12px; }
+      #vpn-ninja-preview .nf-meta { max-width: 82px; margin: 2px auto 0; }
+      #vpn-ninja-preview .nf-status { font-size: 11px; }
+      #vpn-ninja-preview .nf-field { flex-basis: 100%; }
+    }
+  </style>
+  <section class="nf-window" data-state="idle" data-step="ready" aria-label="Сцена подключения VPN">
+    <header class="nf-header"><span class="nf-brand">VPN</span><span class="nf-status"><span class="nf-led" aria-hidden="true"></span><span class="nf-status-text">Не подключено</span></span></header>
+    <div class="nf-heading"><h2>Только браузер</h2><p>Остальные приложения — напрямую</p></div>
+    <div class="nf-stage">
+      <div class="nf-endpoint nf-start"><div class="nf-orb"><i data-lucide="globe" aria-hidden="true"></i></div><div class="nf-name">Chrome</div><div class="nf-meta">Браузер</div></div>
+      <canvas role="img" aria-label="Ниндзя с файлами у браузера готовится проложить нить к серверу">Ниндзя доставляет файлы к серверу; при успешном подключении нить превращается в волну, при ошибке обрывается.</canvas>
+      <div class="nf-endpoint nf-end"><div class="nf-orb"><i data-lucide="landmark" aria-hidden="true"></i></div><div class="nf-name">Амстердам</div><div class="nf-meta">Основной · VLESS</div></div>
+    </div>
+    <div class="nf-actions"><p class="nf-caption" role="status" aria-live="polite">Готова проложить путь</p><button type="button" class="nf-primary cursor-interaction">Подключить</button></div>
+    <footer class="nf-footer"><span class="nf-route-label"><i data-lucide="route" aria-hidden="true"></i>Chrome → Основной</span><span class="nf-demo-label">Демонстрация</span></footer>
+  </section>
+  <div class="nf-controls" aria-label="Управление примером">
+    <label class="form-label nf-field" for="ninja-outcome">Сценарий<select class="form-select" id="ninja-outcome"><option value="success">Успешное подключение</option><option value="error">Ошибка — обрыв нити</option></select></label>
+    <button class="btn btn-primary nf-replay" type="button">Показать сцену</button>
+    <button class="btn nf-pause" type="button" aria-pressed="false">Пауза</button>
+  </div>
+  <script>
+    (() => {
+      const root = document.getElementById('vpn-ninja-preview');
+      const panel = root.querySelector('.nf-window');
+      const canvas = root.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+      const stage = root.querySelector('.nf-stage');
+      const caption = root.querySelector('.nf-caption');
+      const status = root.querySelector('.nf-status-text');
+      const primary = root.querySelector('.nf-primary');
+      const replay = root.querySelector('.nf-replay');
+      const pauseButton = root.querySelector('.nf-pause');
+      const scenario = root.querySelector('select');
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const motion = { speed: 1.3, amplitude: 8, characterSize: .62 };
+      const state = { outcome: 'success', phase: 'idle', paused: false, t: 0, wave: 0 };
+      let width = 660, height = 260, pixelRatio = 1, raf = 0, last = 0, visible = true;
+      let currentStep = '';
+      const clamp = (v,lo=0,hi=1) => Math.min(hi,Math.max(lo,v));
+      const smooth = v => { v=clamp(v); return v*v*(3-2*v); };
+      const smoother = v => { v=clamp(v); return v*v*v*(v*(v*6-15)+10); };
+      const bump = (v,center,radius) => { const d=Math.abs(v-center)/radius; return d>=1?0:Math.pow(.5+.5*Math.cos(Math.PI*d),2); };
+      const lerp = (a,b,t) => a+(b-a)*t;
+
+      function drawNinja(ctx, x, y, opts = {}) {
+  const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+  const scale = opts.scale === undefined ? 1 : opts.scale;
+  const run = clamp(opts.run || 0, 0, 1);
+  const duck = clamp(opts.duck || 0, 0, 1);
+  const phase = opts.phase || 0;
+  const time = opts.time || 0;
+  const facing = opts.facing === undefined ? 1 : clamp(opts.facing, -1, 1);
+  const carrying = opts.carrying !== false;
+  const bob = -.45 * (1 - Math.cos(phase * 2)) * run;
+  const hip = { x: -1, y: -28 + duck * 8 + bob };
+  const shoulder = { x: 2 + duck * 5, y: -49 + duck * 13 + bob };
+  const head = { x: shoulder.x + 3, y: shoulder.y - 15 };
+
+  const shape = (draw, fill, stroke, width = 1) => {
+    ctx.beginPath(); draw();
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = width; ctx.stroke(); }
+  };
+  const ellipse = (cx, cy, rx, ry, fill, rotation = 0) => {
+    shape(() => ctx.ellipse(cx, cy, rx, ry, rotation, 0, Math.PI * 2), fill);
+  };
+  const gradient = (x1, y1, x2, y2, stops) => {
+    const g = ctx.createLinearGradient(x1, y1, x2, y2);
+    stops.forEach(([p, c]) => g.addColorStop(p, c)); return g;
+  };
+  const line = (draw, color, width) => shape(draw, null, color, width);
+  const limb = (a, b, wa, wb, light, dark) => {
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const len = Math.max(0.001, Math.hypot(dx, dy));
+    const nx = -dy / len, ny = dx / len;
+    const fill = gradient(a.x - nx * wa, a.y - ny * wa, a.x + nx * wa, a.y + ny * wa,
+      [[0, dark], [.43, light], [1, dark]]);
+    shape(() => {
+      ctx.moveTo(a.x + nx * wa, a.y + ny * wa);
+      ctx.lineTo(b.x + nx * wb, b.y + ny * wb);
+      ctx.quadraticCurveTo(b.x + dx / len * wb, b.y + dy / len * wb, b.x - nx * wb, b.y - ny * wb);
+      ctx.lineTo(a.x - nx * wa, a.y - ny * wa);
+      ctx.quadraticCurveTo(a.x - dx / len * wa, a.y - dy / len * wa, a.x + nx * wa, a.y + ny * wa);
+      ctx.closePath();
+    }, fill);
+  };
+  const kneeFor = (a, b) => {
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const d = clamp(Math.hypot(dx, dy), .1, 31.5);
+    const bend = Math.sqrt(Math.max(0, 16 * 16 - d * d / 4));
+    const actual = Math.max(.1, Math.hypot(dx, dy));
+    return { x: (a.x + b.x) / 2 + dy / actual * bend, y: (a.y + b.y) / 2 - dx / actual * bend };
+  };
+
+  ctx.save();
+  ctx.globalAlpha *= opts.opacity === undefined ? 1 : clamp(opts.opacity, 0, 1);
+  ctx.translate(x, y);
+  ctx.scale(scale * facing, scale);
+  ctx.rotate(opts.lean || 0);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // The broad, tapering silk ribbon reads clearly even at thumbnail size.
+  const scarfY = shoulder.y - 7;
+  const flutter = Math.sin(time * 4.5 + phase * .08) * (1 + run * 1.4);
+  const scarfLength = 25 + run * 10;
+  shape(() => {
+    ctx.moveTo(shoulder.x - 4, scarfY - 1);
+    ctx.bezierCurveTo(-14, scarfY - 8, -22, scarfY + 5 + flutter, -scarfLength, scarfY - 7 + flutter);
+    ctx.lineTo(-scarfLength + 4, scarfY + 2 + flutter);
+    ctx.lineTo(-scarfLength - 1, scarfY + 5 + flutter);
+    ctx.bezierCurveTo(-23, scarfY + 12 + flutter, -16, scarfY - 1, shoulder.x - 3, scarfY + 6);
+    ctx.closePath();
+  }, gradient(-scarfLength, scarfY, 2, scarfY + 10, [[0, '#319b9d'], [.5, '#77ded2'], [1, '#a9f8e6']]));
+  line(() => {
+    ctx.moveTo(shoulder.x - 6, scarfY + 1);
+    ctx.bezierCurveTo(-17, scarfY - 2, -24, scarfY + 8 + flutter, -scarfLength + 5, scarfY + flutter);
+  }, 'rgba(207,255,244,.6)', .65);
+
+  // High ponytail, a soft curved silhouette rather than individual hair strands.
+  const hairSwing = Math.sin(time * 3.5) * (.5 + run);
+  shape(() => {
+    ctx.moveTo(head.x - 7, head.y - 7);
+    ctx.bezierCurveTo(head.x - 19, head.y - 18, head.x - 23, head.y - 5 + hairSwing, head.x - 19, head.y + 6 + hairSwing);
+    ctx.quadraticCurveTo(head.x - 23, head.y + 4, head.x - 25, head.y - 1);
+    ctx.bezierCurveTo(head.x - 25, head.y + 11 + hairSwing, head.x - 12, head.y + 8, head.x - 12, head.y - 2);
+    ctx.closePath();
+  }, gradient(head.x - 22, head.y - 15, head.x - 10, head.y + 8, [[0, '#65727e'], [.5, '#28394a'], [1, '#172939']]));
+
+  // Far arm counterbalances the stride.
+  const backShoulder = {x: shoulder.x - 6, y: shoulder.y + 2};
+  const backElbow = {x: shoulder.x - 11 - Math.sin(phase) * 6 * run, y: shoulder.y + 13};
+  const backHand = {x: backElbow.x - 7 + Math.cos(phase) * 4 * run, y: backElbow.y + 5 - run * 5};
+  limb(backShoulder, backElbow, 4.0, 3, '#778996', '#364c60');
+  limb(backElbow, backHand, 3.1, 2.7, '#668193', '#263f54');
+  ellipse(backHand.x, backHand.y, 3.0, 3.3, '#334d60', -.4);
+
+  const drawLeg = (offset, far) => {
+    const p = phase + offset;
+    const foot = {
+      x: (far ? -7 : 8) * (1 - run) + Math.sin(p) * 11 * run,
+      y: -1 - Math.pow(Math.max(0, Math.cos(p)), 2) * 8 * run
+    };
+    const h = {x: hip.x + (far ? -3.7 : 3.3), y: hip.y};
+    const knee = kneeFor(h, foot);
+    limb(h, knee, far ? 4.6 : 5.0, 3.5, far ? '#758594' : '#c6cfd3', far ? '#32495c' : '#6e8595');
+    ellipse(knee.x, knee.y, 3.9, 3.4, far ? '#496477' : '#8aa3b1', -.2);
+    limb(knee, foot, 3.4, 3.0, far ? '#597387' : '#7893a4', '#273e52');
+    // Shin wrap highlights and compact split-toe boots.
+    const mid = {x:knee.x * .45 + foot.x * .55, y:knee.y * .45 + foot.y * .55};
+    line(() => {ctx.moveTo(mid.x - 2.6, mid.y - 1); ctx.lineTo(mid.x + 2.2, mid.y + .7);}, far ? '#8babb3' : '#a2c2c6', .8);
+    shape(() => {
+      ctx.moveTo(foot.x - 3, foot.y - 3);
+      ctx.quadraticCurveTo(foot.x + 2, foot.y - 4, foot.x + 3.7, foot.y - 1.5);
+      ctx.quadraticCurveTo(foot.x + 9, foot.y - .2, foot.x + 8.5, foot.y + 2.0);
+      ctx.quadraticCurveTo(foot.x + 3, foot.y + 3.4, foot.x - 3.7, foot.y + 1.6);
+      ctx.closePath();
+    }, gradient(foot.x, foot.y - 4, foot.x, foot.y + 3, [[0, far ? '#728b98' : '#9badb5'], [1, '#243c4d']]));
+    line(() => { ctx.moveTo(foot.x + 5.9, foot.y + .3); ctx.lineTo(foot.x + 6, foot.y + 1.7); }, '#284355', .6);
+  };
+  drawLeg(Math.PI, true);
+  drawLeg(0, false);
+
+  // Tailored wrapped tunic: light shoulders, a compact waist and soft side shading.
+  shape(() => {
+    ctx.moveTo(shoulder.x - 8, shoulder.y - 1);
+    ctx.quadraticCurveTo(shoulder.x + 1, shoulder.y - 6, shoulder.x + 9, shoulder.y);
+    ctx.bezierCurveTo(shoulder.x + 9, shoulder.y + 9, hip.x + 6, hip.y - 5, hip.x + 9, hip.y + 4);
+    ctx.quadraticCurveTo(hip.x + 1, hip.y + 9, hip.x - 9, hip.y + 3);
+    ctx.bezierCurveTo(hip.x - 7, hip.y - 6, shoulder.x - 10, shoulder.y + 10, shoulder.x - 8, shoulder.y - 1);
+    ctx.closePath();
+  }, gradient(shoulder.x - 11, shoulder.y, shoulder.x + 11, shoulder.y + 5, [[0, '#6d8497'], [.35, '#cbd6db'], [.62, '#e2e8e6'], [1, '#8499a7']]));
+  shape(() => {
+    ctx.moveTo(shoulder.x - 4, shoulder.y - 2);
+    ctx.lineTo(shoulder.x + 6, shoulder.y + 3);
+    ctx.lineTo(hip.x - 2, hip.y - 3);
+    ctx.lineTo(hip.x - 6, hip.y - 4);
+    ctx.closePath();
+  }, 'rgba(75,101,118,.36)');
+  line(() => {ctx.moveTo(shoulder.x + 7, shoulder.y + 3);ctx.lineTo(hip.x - 3, hip.y - 2);}, '#edf1ed', .8);
+  shape(() => {
+    ctx.moveTo(hip.x - 8, hip.y - 3); ctx.quadraticCurveTo(hip.x, hip.y, hip.x + 7, hip.y - 3);
+    ctx.lineTo(hip.x + 8, hip.y + 1.5); ctx.quadraticCurveTo(hip.x, hip.y + 4, hip.x - 8, hip.y + 1);
+    ctx.closePath();
+  }, '#3e6875');
+  ellipse(hip.x + 4, hip.y, 2.6, 2.3, '#9ce6d6');
+
+  // Cowl, exposed eye band and mask preserve a ninja silhouette without a helmet.
+  ellipse(head.x - 1, head.y + .1, 11.0, 12.5,
+    gradient(head.x - 10, head.y - 7, head.x + 9, head.y + 8, [[0, '#7a91a1'], [.4, '#d5dedf'], [.7, '#c1d0d4'], [1, '#738c9e']]), -.08);
+  shape(() => {
+    ctx.moveTo(head.x - 8, head.y - 2);
+    ctx.quadraticCurveTo(head.x + 1, head.y - 5, head.x + 9, head.y - 1.5);
+    ctx.lineTo(head.x + 9.3, head.y + 4);
+    ctx.quadraticCurveTo(head.x + 1, head.y + 7, head.x - 8, head.y + 3.8);
+    ctx.closePath();
+  }, gradient(head.x - 7, head.y - 2, head.x + 9, head.y + 5, [[0, '#d4bfb5'], [.4, '#f5e4d6'], [1, '#f0d9c9']]));
+  // A clean dark fringe and tiny side lock.
+  shape(() => {
+    ctx.moveTo(head.x - 9, head.y - 4);
+    ctx.quadraticCurveTo(head.x - 6, head.y - 14, head.x + 3, head.y - 11);
+    ctx.quadraticCurveTo(head.x + 8, head.y - 10, head.x + 9, head.y - 3);
+    ctx.quadraticCurveTo(head.x + 2, head.y - 6, head.x - 1, head.y - 4);
+    ctx.lineTo(head.x - 4, head.y); ctx.lineTo(head.x - 6, head.y - 2);
+    ctx.lineTo(head.x - 7, head.y + 6); ctx.closePath();
+  }, gradient(head.x - 7, head.y - 12, head.x + 7, head.y - 1, [[0, '#52697a'], [.45, '#20384b'], [1, '#355063']]));
+  line(() => {ctx.moveTo(head.x - 5, head.y - 9);ctx.quadraticCurveTo(head.x, head.y - 12, head.x + 4, head.y - 8);}, 'rgba(172,197,205,.35)', .8);
+
+  const blink = Math.sin(time * .95) > .994;
+  if (blink) {
+    line(() => {ctx.moveTo(head.x - 3.9, head.y + 1.3);ctx.lineTo(head.x - .7, head.y + 1.2);ctx.moveTo(head.x + 3.5, head.y + .9);ctx.lineTo(head.x + 7.0, head.y + .6);}, '#2a4050', .85);
+  } else {
+    ellipse(head.x - 2.3, head.y + 1.0, 1.95, 1.4, '#fbf7ed', -.11);
+    ellipse(head.x + 5.2, head.y + .6, 2.1, 1.6, '#fbf7ed', -.12);
+    ellipse(head.x - 1.6, head.y + 1.0, .9, 1.3, '#407b7d');
+    ellipse(head.x + 5.9, head.y + .7, 1.0, 1.45, '#407b7d');
+    ellipse(head.x - 1.3, head.y + 1.05, .45, .9, '#172e3a');
+    ellipse(head.x + 6.15, head.y + .7, .45, 1.0, '#172e3a');
+    ellipse(head.x - 1.5, head.y + .35, .37, .37, '#ffffff');
+    ellipse(head.x + 5.95, head.y + .1, .4, .4, '#ffffff');
+    line(() => {ctx.moveTo(head.x - 4.4, head.y + .2);ctx.quadraticCurveTo(head.x - 2, head.y - 1.2, head.x - .25, head.y + .1);}, '#233c4d', .85);
+    line(() => {ctx.moveTo(head.x + 2.7, head.y + .1);ctx.quadraticCurveTo(head.x + 5.2, head.y - 1.4, head.x + 7.6, head.y -.3);}, '#233c4d', 1.0);
+  }
+  shape(() => {
+    ctx.moveTo(head.x - 8, head.y + 3.1);
+    ctx.quadraticCurveTo(head.x - .5, head.y + 4.5, head.x + 3.6, head.y + 2.5);
+    ctx.quadraticCurveTo(head.x + 7.2, head.y + 4.4, head.x + 9, head.y + 3.5);
+    ctx.quadraticCurveTo(head.x + 9, head.y + 11, head.x + 1, head.y + 12);
+    ctx.quadraticCurveTo(head.x - 6, head.y + 11, head.x - 8, head.y + 3.1);
+    ctx.closePath();
+  }, gradient(head.x - 8, head.y + 3, head.x + 8, head.y + 12, [[0, '#526c7f'], [.5, '#8ca3af'], [1, '#385768']]));
+  line(() => {ctx.moveTo(head.x - 4, head.y + 7);ctx.quadraticCurveTo(head.x + 1, head.y + 8.5, head.x + 5.6, head.y + 7);}, 'rgba(227,241,238,.3)', .7);
+  ellipse(head.x - 12, head.y - 8, 2.3, 3.0, '#9ce8da', -.5);
+
+  // The mint scarf wraps over the cowl and body.
+  shape(() => {
+    ctx.moveTo(shoulder.x - 7, shoulder.y - 7);
+    ctx.quadraticCurveTo(shoulder.x + 1, shoulder.y - 3, shoulder.x + 10, shoulder.y - 7);
+    ctx.lineTo(shoulder.x + 9, shoulder.y - 1);
+    ctx.quadraticCurveTo(shoulder.x, shoulder.y + 2.8, shoulder.x - 7, shoulder.y - 2);
+    ctx.closePath();
+  }, gradient(0, shoulder.y - 7, 0, shoulder.y + 3, [[0, '#b2f4e5'], [.4, '#75d6c9'], [1, '#368e95']]));
+
+  const frontShoulder = {x: shoulder.x + 7, y: shoulder.y + 3};
+  const frontElbow = {x: shoulder.x + 12 + (carrying ? 0 : Math.sin(phase) * 5 * run), y: shoulder.y + 15};
+  const frontHand = {x: shoulder.x + 20, y: shoulder.y + (carrying ? 8 : 19 - Math.sin(phase) * 7 * run)};
+  limb(frontShoulder, frontElbow, 4.6, 3.4, '#d7e1e1', '#8097a7');
+  limb(frontElbow, frontHand, 3.6, 2.7, '#95aebc', '#3a596f');
+  line(() => {ctx.moveTo(frontElbow.x + 1, frontElbow.y - 2);ctx.lineTo(frontHand.x - 3, frontHand.y - 2.5);}, '#cfdfde', .8);
+
+  if (carrying) {
+    ctx.save();
+    ctx.translate(frontHand.x + 1, frontHand.y - 4);
+    ctx.rotate(-.1 + Math.sin(phase) * run * .035);
+    ctx.shadowColor = 'rgba(104,244,213,.6)';
+    ctx.shadowBlur = 7;
+    shape(() => {
+      ctx.moveTo(-5, -10); ctx.lineTo(2, -10); ctx.lineTo(4, -8); ctx.lineTo(10, -8);
+      ctx.quadraticCurveTo(11, -8, 11, -6); ctx.lineTo(10, 7); ctx.lineTo(-6, 7);ctx.closePath();
+    }, '#4eafb2', '#bdf9e6', .7);
+    ctx.shadowBlur = 0;
+    shape(() => {
+      ctx.moveTo(-3.5, -11.5);ctx.lineTo(5.3, -11.5);ctx.lineTo(8, -8.8);ctx.lineTo(8, 3);
+      ctx.lineTo(-3.5, 3);ctx.closePath();
+    }, '#e5fff2');
+    shape(() => {ctx.moveTo(5.3, -11.5);ctx.lineTo(5.3, -8.7);ctx.lineTo(8, -8.7);ctx.closePath();}, '#9bddcd');
+    line(() => {ctx.moveTo(-1.2, -7.4);ctx.lineTo(4, -7.4);ctx.moveTo(-1.2, -4.8);ctx.lineTo(5.6, -4.8);}, '#81bdb5', .75);
+    shape(() => {
+      ctx.moveTo(-7, -3.5); ctx.lineTo(11, -3.5); ctx.lineTo(9.5, 7.5);ctx.lineTo(-6, 7.5);ctx.closePath();
+    }, gradient(0,-4,0,8,[[0,'#a5f1db'],[.5,'#7ad7c7'],[1,'#4da4a6']]), '#cbfff0', .6);
+    line(() => {ctx.moveTo(-4.5,-1);ctx.lineTo(8,-1);}, 'rgba(239,255,247,.8)', .6);
+    ctx.restore();
+  }
+  ellipse(frontHand.x - .6, frontHand.y + .4, 3.2, 3.0, '#486b7e', -.4);
+  line(() => {ctx.moveTo(frontHand.x -.9,frontHand.y -1);ctx.quadraticCurveTo(frontHand.x+1.7,frontHand.y -2.5,frontHand.x+2.5,frontHand.y-.2);}, '#a5bfc7', .9);
+  ctx.restore();
+}
+
+
+      function saved(data) {
+        const content = data && data.modelContent;
+        if (content && content.preview === 'ninja-connection' && ['success','error'].includes(content.scenario)) {
+          state.outcome = content.scenario; scenario.value = content.scenario;
+        }
+      }
+      saved(window.openai && window.openai.widgetState);
+      function persist() {
+        if (window.openai && window.openai.setWidgetState) {
+          const result=window.openai.setWidgetState({modelContent:{preview:'ninja-connection',scenario:state.outcome},privateContent:null});
+          if(result&&result.catch)result.catch(()=>{});
+        }
+      }
+      function geometry() {
+        const edge = width < 450 ? 36 : 44;
+        const start=edge+23, end=width-edge-27;
+        return {left:edge,right:width-edge,start,end,span:end-start,base:166,scale:motion.characterSize*clamp(width/650,.78,1)};
+      }
+      function glow(x,y,r,color,opacity=1) {
+        ctx.save(); ctx.globalAlpha=opacity;
+        const gradient=ctx.createRadialGradient(x,y,0,x,y,r);
+        gradient.addColorStop(0,color); gradient.addColorStop(1,'rgba(94,230,231,0)');
+        ctx.fillStyle=gradient; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.restore();
+      }
+      function line(points,color='rgba(247,255,255,.96)',alpha=1,shine=true) {
+        if(points.length<2)return;
+        ctx.save(); ctx.globalAlpha=alpha; ctx.lineJoin='round'; ctx.lineCap='round';
+        function trace(){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));}
+        if(shine){trace();ctx.lineWidth=4;ctx.strokeStyle='rgba(77,218,227,.20)';ctx.shadowBlur=10;ctx.shadowColor='#66e8ed';ctx.stroke();ctx.shadowBlur=0;}
+        trace();ctx.lineWidth=1.6;ctx.strokeStyle=color;ctx.stroke();ctx.restore();
+      }
+      function pathBetween(a,b,yfn) {
+        const pts=[];for(let i=0;i<=72;i++){const u=i/72;pts.push([lerp(a,b,u),yfn(u)]);}return pts;
+      }
+      function wave(g,alpha=1,amp=motion.amplitude) {
+        const y=u=>g.base+amp*Math.sin(Math.PI*u)*Math.sin(u*Math.PI*2-state.wave*.75);
+        line(pathBetween(g.left+27,g.right-27,y),'rgba(249,255,255,.96)',alpha);
+        [0,.333,.666].forEach((off,i)=>{
+          const u=(state.wave*.065+.16+off)%1, x=lerp(g.left+27,g.right-27,u),py=y(u);
+          const fade=Math.min(1,u*10,(1-u)*10)*alpha;
+          glow(x,py,i?13:20,'rgba(60,232,233,.72)',fade);
+          ctx.save();ctx.globalAlpha=fade;ctx.fillStyle='#fbffff';ctx.beginPath();ctx.arc(x,py,i?2.5:3.9,0,Math.PI*2);ctx.fill();ctx.restore();
+        });
+      }
+      function barrier(x,g,type,opacity) {
+        if(opacity<=0)return;
+        ctx.save();ctx.globalAlpha=opacity*.65;ctx.lineWidth=.8;ctx.strokeStyle='rgba(141,168,188,.45)';
+        if(type==='overhead'){
+          const bottom=g.base-67*g.scale;
+          ctx.fillStyle='rgba(242,252,255,.75)';ctx.beginPath();ctx.roundRect(x-12,bottom-5,24,5,2.5);ctx.fill();ctx.stroke();
+          ctx.strokeStyle='rgba(167,192,206,.22)';ctx.beginPath();ctx.moveTo(x-10,bottom-5);ctx.lineTo(x-10,bottom-15);ctx.moveTo(x+10,bottom-5);ctx.lineTo(x+10,bottom-15);ctx.stroke();
+        }else{
+          const top=g.base-12*g.scale;
+          ctx.fillStyle='rgba(240,251,255,.48)';ctx.beginPath();ctx.roundRect(x-9,top,18,12*g.scale,3);ctx.fill();ctx.stroke();
+          ctx.strokeStyle='#ffffffc4';ctx.beginPath();ctx.moveTo(x-6,top+2);ctx.lineTo(x+6,top+2);ctx.stroke();
+        }ctx.restore();
+      }
+      function shadow(x,g,hop,alpha=1) {
+        ctx.save();ctx.globalAlpha=.085*alpha*(1-clamp(hop/55)*.6);ctx.fillStyle='#598391';ctx.filter='blur(3px)';ctx.beginPath();ctx.ellipse(x,g.base+3,18*g.scale,2.5,0,0,Math.PI*2);ctx.fill();ctx.restore();
+      }
+      function dissolve(x,y,t,g) {
+        const p=smoother(t);
+        for(let i=0;i<9;i++){
+          const seed=(i*1.618)%1, x0=x+(seed-.5)*26*g.scale, y0=y-12-(i%6)*10*g.scale;
+          const px=lerp(x0,g.right-27+Math.sin(i*2.1)*5,p),py=lerp(y0,g.base,p)+Math.sin(p*Math.PI)*(i%2?5:-7);
+          ctx.save();ctx.globalAlpha=(1-p)*smooth(t/.2)*.55;ctx.fillStyle=i%3?'#f8ffff':'#72dfe3';ctx.beginPath();ctx.arc(px,py,i%4===0?1.8:1,0,Math.PI*2);ctx.fill();ctx.restore();
+        }
+      }
+      function breakThread(g,t) {
+        const u=.66, split=lerp(g.left+27,g.right-27,u),gap=19*smoother(t/.6);
+        const pull=Math.sin(t*7)*Math.exp(-t*3)*5*smooth(t/.12);
+        const leftY=g.base+12*smoother(t/.9)+pull, rightY=g.base-8*smoother(t/.9)-pull*.5;
+        const alpha=lerp(1,.40,smoother(t/1.6));
+        line(pathBetween(g.left+27,split-gap,v=>lerp(g.base,leftY,v*v)),'rgba(164,180,193,.9)',alpha,false);
+        line(pathBetween(split+gap,g.right-27,v=>lerp(rightY,g.base,Math.sin(v*Math.PI/2))),'rgba(164,180,193,.9)',alpha,false);
+        if(t<.55){
+          const p=t/.55, light=Math.sin(Math.PI*p)*.5;glow(split,g.base,13+8*p,'rgba(204,174,186,.38)',light);
+          ctx.save();ctx.globalAlpha=light;ctx.strokeStyle='#fff9fa';ctx.lineWidth=1;
+          for(let i=0;i<3;i++){const a=i*Math.PI*2/3-.4;ctx.beginPath();ctx.moveTo(split+Math.cos(a)*(2+5*p),g.base+Math.sin(a)*(2+5*p));ctx.lineTo(split+Math.cos(a)*(4+9*p),g.base+Math.sin(a)*(4+9*p));ctx.stroke();}ctx.restore();
+        }
+      }
+      function stageLabel(step) {
+        if(step===currentStep)return;currentStep=step;panel.dataset.step=step;
+        const texts={ready:'Готова проложить путь',prepare:'Берём файлы с собой',duck:'Проскальзываем под преградой',jump:'Находим свободный путь',delivery:'Доставляем файлы',dissolve:'Соединение установлено',tension:'Путь оказался закрыт',break:'Нить оборвалась',return:'Возвращаемся с файлами',success:'Канал установлен',error:'Не удалось подключиться',disconnect:'Отключаемся'};
+        caption.textContent=texts[step]||'';
+      }
+      function renderFrame() {
+        ctx.setTransform(pixelRatio,0,0,pixelRatio,0,0);ctx.clearRect(0,0,width,height);
+        const g=geometry(),t=state.t;
+        if(state.phase==='success') {wave(g);stageLabel('success');return;}
+        if(state.phase==='disconnect') {wave(g,1-smooth(t/.7));stageLabel('disconnect');return;}
+        if(state.phase==='idle') {
+          line([[g.left+27,g.base],[g.right-27,g.base]],'rgba(182,205,218,.45)',.48,false);
+          shadow(g.start,g,0);drawNinja(ctx,g.start,g.base,{scale:g.scale,phase:0,run:0,time:state.wave,carrying:true});stageLabel('ready');return;
+        }
+        if(state.phase==='error') {
+          breakThread(g,3);shadow(g.start,g,0);drawNinja(ctx,g.start,g.base,{scale:g.scale,run:0,time:state.wave,carrying:true});stageLabel('error');return;
+        }
+        const failed=state.outcome==='error';
+        const moveEnd=failed?3.25:3.85;
+        const travel=clamp((t-.35)/(moveEnd-.35));
+        let progress=(failed?.78:1)*smoother(travel);
+        let run=.6*Math.pow(Math.sin(Math.PI*travel),2);
+        let duck=.9*bump(progress,.28,.19);
+        let hop=26*g.scale*bump(progress,.61,.17);
+        let opacity=1,facing=1,lean=.06*run-.035*bump(progress,.61,.17),carrying=true;
+        let step=t<.35?'prepare':progress<.46?'duck':progress<.79?'jump':'delivery';
+        if(failed&&t>=moveEnd){
+          hop=0;duck=0;run=0;lean=-.07*bump(t,3.6,.35);
+          step=t<3.65?'tension':t<4.05?'break':'return';
+          facing=1-2*smoother((t-3.85)/.2);
+          if(t>=4.05){
+            const back=clamp((t-4.05)/2.1);
+            progress=.78*(1-smoother(back));run=.55*Math.pow(Math.sin(Math.PI*back),2);
+            hop=4*g.scale*Math.pow(Math.sin(Math.PI*back),2);lean=.05*run;
+            facing=-1+2*smoother((back-.9)/.1);
+            if(back===1)step='error';
+          }
+        }else if(!failed&&t>=moveEnd){
+          hop=0;duck=0;run=0;lean=.035*bump(t,4.02,.17);
+          carrying=t<4.08;opacity=1-smoother((t-4.22)/.72);
+          step=t<4.22?'delivery':'dissolve';
+        }
+        const x=lerp(g.start,g.end,progress),y=g.base-hop;
+        if(t<moveEnd){
+          barrier(lerp(g.start,g.end,.28),g,'overhead',smooth(progress/.1)*(1-smooth((progress-.35)/.16)));
+          barrier(lerp(g.start,g.end,.61),g,'block',smooth((progress-.34)/.17)*(1-smooth((progress-.68)/.10)));
+        }
+        if(failed&&t>=3.65){breakThread(g,t-3.65);}
+        else if(failed&&t>=3.25){
+          const strain=smoother((t-3.25)/.4);
+          const reach=lerp(g.end-(1-.78)*g.span+2,g.right-27,strain);
+          line(pathBetween(g.left+27,reach,u=>g.base+Math.sin(u*Math.PI*2)*1.5*(1-strain)),'rgba(238,240,245,.97)');
+        }else if(t>=3.85&&!failed) {
+          wave(g,1,motion.amplitude*smoother((t-3.85)/1.1));
+        }else{
+          const end=Math.max(g.left+28,x+2);
+          line(pathBetween(g.left+27,end,u=>g.base+Math.sin(u*Math.PI*2-t)*1.5*Math.sin(u*Math.PI)));
+          for(let i=0;i<2;i++){const tx=end-i*8-6;if(tx>g.left+27)glow(tx,g.base,7,'rgba(120,239,238,.24)',.6-i*.18);}
+        }
+        shadow(x,g,hop,opacity);
+        if(opacity>0)drawNinja(ctx,x,y,{scale:g.scale,phase:t*7.8,run,duck,lean,facing,opacity,time:t,carrying});
+        if(!failed&&t>=4.08&&t<4.65){
+          const p=smoother((t-4.08)/.57),px=lerp(g.end+23*g.scale,g.right,p),py=lerp(g.base-45*g.scale,g.base,p);
+          glow(px,py,13,'rgba(99,229,224,.45)',1-p);
+          ctx.save();ctx.translate(px,py);ctx.scale(g.scale,g.scale);ctx.rotate(.04);ctx.globalAlpha=1-p;ctx.fillStyle='#eaffff';ctx.strokeStyle='#7ed8dc';ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(-6,-8,12,16,3);ctx.fill();ctx.stroke();ctx.restore();
+        }
+        if(t>=4.22&&!failed)dissolve(x,y,(t-4.22)/.82,g);
+        stageLabel(step);
+      }
+      function updateControls() {
+        panel.dataset.state=state.phase;
+        const names={idle:'Не подключено',running:'Подключение…',success:'Подключено',error:'Ошибка подключения',disconnect:'Отключение…'};
+        status.textContent=names[state.phase];
+        primary.textContent=state.phase==='running'?'Отмена':state.phase==='success'?'Отключить':state.phase==='error'?'Повторить':'Подключить';
+        pauseButton.textContent=state.paused?'Продолжить':'Пауза';pauseButton.setAttribute('aria-pressed',String(state.paused));
+        canvas.setAttribute('aria-label',state.phase==='success'?'Соединение установлено. Нить стала плавной волной.':state.phase==='error'?'Нить оборвалась. Ниндзя вернулась к браузеру с файлами.':state.phase==='running'?'Ниндзя с файлами прокладывает путь между браузером и сервером.':'Ниндзя с файлами готовится к подключению.');
+      }
+      function start() {
+        state.outcome=scenario.value;state.t=0;state.wave=0;state.paused=false;
+        state.phase=reduced.matches?state.outcome:'running';currentStep='';updateControls();renderFrame();persist();wake();
+      }
+      function frame(now) {
+        raf=0;if(!root.isConnected||document.hidden||!visible){last=0;return;}
+        const dt=last?Math.min((now-last)/1000,.045):0;last=now;
+        if(!state.paused&&!reduced.matches){
+          state.wave+=dt*motion.speed;
+          if(state.phase==='running'){
+            state.t+=dt;
+            const end=state.outcome==='error'?6.3:5.05;
+            if(state.t>=end){state.phase=state.outcome;state.t=0;updateControls();}
+          }else if(state.phase==='disconnect'){
+            state.t+=dt;if(state.t>=.7){state.phase='idle';state.t=0;updateControls();}
+          }
+        }
+        renderFrame();
+        if(!state.paused&&!reduced.matches&&(state.phase==='running'||state.phase==='success'||state.phase==='disconnect'))raf=requestAnimationFrame(frame);else last=0;
+      }
+      function wake(){if(!raf&&!document.hidden&&visible)raf=requestAnimationFrame(frame);}
+      function resize(){const rect=stage.getBoundingClientRect();width=Math.max(1,rect.width);height=260;pixelRatio=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(width*pixelRatio);canvas.height=Math.round(height*pixelRatio);renderFrame();}
+      primary.addEventListener('click',()=>{
+        if(state.phase==='running'||state.phase==='disconnect'){state.phase='idle';state.t=0;state.paused=false;updateControls();renderFrame();}
+        else if(state.phase==='success'){state.phase=reduced.matches?'idle':'disconnect';state.t=0;state.paused=false;updateControls();wake();}
+        else start();
+      });
+      replay.addEventListener('click',start);
+      pauseButton.addEventListener('click',()=>{state.paused=!state.paused;updateControls();wake();});
+      scenario.addEventListener('change',()=>{state.outcome=scenario.value;persist();if(state.phase==='running')start();});
+      window.addEventListener('openai:set_globals',e=>saved(e.detail&&e.detail.globals&&e.detail.globals.widgetState));
+      reduced.addEventListener('change',()=>{if(reduced.matches&&state.phase==='running')state.phase=state.outcome;if(reduced.matches&&state.phase==='disconnect')state.phase='idle';updateControls();renderFrame();wake();});
+      document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;last=0;}else wake();});
+      new ResizeObserver(resize).observe(stage);
+      new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible)wake();else{cancelAnimationFrame(raf);raf=0;last=0;}}).observe(panel);
+      resize();updateControls();renderFrame();
+      if(globalThis.Tweak){const tweak=new Tweak({container:panel,onChange:()=>{renderFrame();wake();}});tweak.addSlider(motion,'characterSize',{label:'Размер ниндзя',min:.4,max:.8,step:.02});tweak.addSlider(motion,'speed',{label:'Скорость волны',min:.3,max:1.6,step:.1});tweak.addSlider(motion,'amplitude',{label:'Высота волны',min:4,max:20,step:1,unit:'px'});}
+    })();
+  </script>
+</div>

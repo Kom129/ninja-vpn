@@ -1,0 +1,12 @@
+[workspace]
+resolver = "3"
+members = ["motor", "app/src-tauri"]
+
+# Настройки выпускной сборки окна (раньше лежали в app/src-tauri/Cargo.toml;
+# в рабочем пространстве Cargo читает их только отсюда).
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true

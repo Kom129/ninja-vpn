@@ -1,0 +1,30 @@
+# Секреты — никогда не отправлять в Git
+.env
+.env.*
+!.env.example
+# Рабочие файлы мотора: конфиги sing-box содержат ключи
+runtime/
+
+# Скачанные сетевые ядра (восстанавливаются scripts/fetch-engines.ps1)
+engines/bin/
+
+# Зависимости (восстанавливаются командой установки)
+node_modules/
+.venv/
+venv/
+__pycache__/
+target/
+
+# Результаты сборки
+dist/
+build/
+
+# Мусор системы и редактора
+.DS_Store
+Thumbs.db
+*.log
+
+# Исходники «окон в страны» от Codex (2–3 МБ каждый): в Git идут уменьшенные копии docs/design/places/archive/*.webp
+docs/design/places/*.png
+!docs/design/places/styles-nl.png
+!docs/design/places/ref-style-a.png
