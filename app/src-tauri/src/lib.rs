@@ -40,6 +40,8 @@ struct AppState {
     /// Режим «Приложения»: список программ, кого мы запустили, сторож.
     apps: Mutex<Apps>,
     app_store: AppStore,
+    /// Страница «ключ с телефона» (QR-код), пока открыто её окно.
+    pairing: Mutex<Option<ninja_motor::pair::Pairing>>,
 }
 
 /// Подключение сейчас: покой, идёт подключение или работает.
@@ -143,7 +145,7 @@ fn emit(app: &AppHandle, conn: &mut Conn, event: StateEvent) {
     let _ = app.emit("vpn-state", event);
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 struct ServerView {
     /// `<id источника>/<имя сервера>`: номера в подписке меняются после обновления, имена — нет,
@@ -157,7 +159,7 @@ struct ServerView {
 }
 
 /// Источник для окна: сведения + его серверы. Секретов здесь нет.
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 struct SourceView {
     id: String,
@@ -239,6 +241,42 @@ async fn add_source(name: Option<String>, link: String) -> Result<SourceView, St
     })
     .await
     .map_err(|e| e.to_string())?
+}
+
+/// Страница для телефона: адрес и QR-код.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PairView {
+    url: String,
+    qr_svg: String,
+}
+
+/// Открыть страницу «ключ с телефона» в домашней сети. Каждый присланный ключ или подписка
+/// добавляется как обычный источник, а окно узнаёт о нём событием `pair-added`.
+#[tauri::command]
+fn pair_start(app: AppHandle, state: tauri::State<AppState>) -> Result<PairView, String> {
+    let mut slot = state.pairing.lock().unwrap_or_else(|p| p.into_inner());
+    if let Some(old) = slot.as_mut() {
+        old.stop();
+    }
+    let events = app.clone();
+    let pairing = ninja_motor::pair::Pairing::start(Box::new(move |link: &str| {
+        let store = SourceStore::open(SourceStore::default_dir());
+        let info = store.add(None, link).map_err(|e| e.to_string())?;
+        let name = info.name.clone();
+        let _ = events.emit("pair-added", source_view(&store, info));
+        Ok(name)
+    }))?;
+    let view = PairView { url: pairing.url.clone(), qr_svg: pairing.qr_svg.clone() };
+    *slot = Some(pairing);
+    Ok(view)
+}
+
+/// Закрыть страницу для телефона (окно с QR-кодом закрыли).
+#[tauri::command]
+fn pair_stop(state: tauri::State<AppState>) {
+    let old = state.pairing.lock().unwrap_or_else(|p| p.into_inner()).take();
+    drop(old); // остановка — без замка: поток страницы заканчивает текущий запрос
 }
 
 #[tauri::command]
@@ -891,6 +929,7 @@ pub fn run() {
             }),
             apps: Mutex::new(Apps::new(app_store.load())),
             app_store,
+            pairing: Mutex::new(None),
         })
         .setup(|app| {
             apps_mode::spawn_guard(app.handle().clone());
@@ -911,6 +950,8 @@ pub fn run() {
             switch_server,
             disconnect_vpn,
             open_browser,
+            pair_start,
+            pair_stop,
             browser_status,
             restart_browser,
             apps_mode::list_apps,

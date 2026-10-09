@@ -10,6 +10,7 @@ pub mod browser;
 pub mod dotenv;
 pub mod engine;
 pub mod lnk;
+pub mod pair;
 pub mod probe;
 pub mod profile;
 pub mod protect;

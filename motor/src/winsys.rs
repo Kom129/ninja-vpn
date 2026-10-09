@@ -341,6 +341,69 @@ mod imp {
         out
     }
 
+    /// IPv4-адреса компьютера в домашней сети — на настоящих картах (Wi-Fi, кабель), не на VPN:
+    /// по такому адресу телефон в том же Wi-Fi откроет страницу «отправить ключ». Сначала Wi-Fi.
+    pub fn lan_ipv4() -> Vec<std::net::Ipv4Addr> {
+        use windows_sys::Win32::Foundation::ERROR_BUFFER_OVERFLOW;
+        use windows_sys::Win32::NetworkManagement::IpHelper::{
+            GAA_FLAG_SKIP_ANYCAST, GAA_FLAG_SKIP_DNS_SERVER, GAA_FLAG_SKIP_MULTICAST, GetAdaptersAddresses, IP_ADAPTER_ADDRESSES_LH,
+        };
+        use windows_sys::Win32::NetworkManagement::Ndis::IfOperStatusUp;
+        use windows_sys::Win32::Networking::WinSock::SOCKADDR_IN;
+        const ETHERNET: u32 = 6;
+        const WIFI: u32 = 71;
+
+        let flags = GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER;
+        let mut buf: Vec<u64> = vec![0; 16 * 1024 / 8];
+        let mut ok = false;
+        for _ in 0..4 {
+            let mut size = (buf.len() * 8) as u32;
+            let rc = unsafe { GetAdaptersAddresses(AF_INET as u32, flags, std::ptr::null(), buf.as_mut_ptr().cast(), &mut size) };
+            match rc {
+                NO_ERROR => {
+                    ok = true;
+                    break;
+                }
+                ERROR_BUFFER_OVERFLOW => buf = vec![0; size as usize / 8 + 512],
+                _ => break,
+            }
+        }
+        if !ok {
+            return Vec::new();
+        }
+        let mut found: Vec<(u32, std::net::Ipv4Addr)> = Vec::new();
+        let mut p = buf.as_ptr() as *const IP_ADAPTER_ADDRESSES_LH;
+        while !p.is_null() {
+            let a = unsafe { &*p };
+            if a.OperStatus == IfOperStatusUp && matches!(a.IfType, ETHERNET | WIFI) {
+                let mut u = a.FirstUnicastAddress;
+                while !u.is_null() {
+                    let addr = unsafe { &*u }.Address;
+                    if !addr.lpSockaddr.is_null() && unsafe { (*addr.lpSockaddr).sa_family } == AF_INET {
+                        let v4 = unsafe { &*(addr.lpSockaddr as *const SOCKADDR_IN) };
+                        let ip = std::net::Ipv4Addr::from(unsafe { v4.sin_addr.S_un.S_addr }.to_ne_bytes());
+                        if ip.is_private() {
+                            found.push((a.IfType, ip));
+                        }
+                    }
+                    u = unsafe { &*u }.Next;
+                }
+            }
+            p = a.Next;
+        }
+        found.sort_by_key(|(kind, _)| *kind != WIFI);
+        found.into_iter().map(|(_, ip)| ip).collect()
+    }
+
+    /// Случайные байты из генератора Windows (для одноразовых секретов).
+    pub fn random_bytes<const N: usize>() -> [u8; N] {
+        use windows_sys::Win32::Security::Cryptography::{BCRYPT_USE_SYSTEM_PREFERRED_RNG, BCryptGenRandom};
+        let mut out = [0u8; N];
+        let status = unsafe { BCryptGenRandom(std::ptr::null_mut(), out.as_mut_ptr(), N as u32, BCRYPT_USE_SYSTEM_PREFERRED_RNG) };
+        assert!(status >= 0, "генератор случайных чисел Windows не ответил: {status:#x}");
+        out
+    }
+
     /// Пиксели картинки Windows (32 бита на точку, сверху вниз), порядок байтов BGRA.
     unsafe fn bitmap_pixels(dc: HDC, bitmap: HBITMAP, width: i32, height: i32) -> Option<Vec<u8>> {
         let mut info: BITMAPINFO = unsafe { std::mem::zeroed() };
@@ -589,8 +652,8 @@ mod imp {
 
 #[cfg(windows)]
 pub use imp::{
-    Elevated, activate_app, ansi_to_string, command_line, icon_png, image_path, internet_adapters, package_path, pick_program,
-    process_alive, processes, run_elevated, spawn_elevated, tcp_connections, terminate,
+    Elevated, activate_app, ansi_to_string, command_line, icon_png, image_path, internet_adapters, lan_ipv4, package_path,
+    pick_program, process_alive, processes, random_bytes, run_elevated, spawn_elevated, tcp_connections, terminate,
 };
 
 #[cfg(not(windows))]
@@ -644,6 +707,14 @@ mod stub {
     }
     pub fn internet_adapters() -> Vec<Adapter> {
         Vec::new()
+    }
+    pub fn lan_ipv4() -> Vec<std::net::Ipv4Addr> {
+        Vec::new()
+    }
+    pub fn random_bytes<const N: usize>() -> [u8; N] {
+        // Не Windows — программа там не работает; для сборки тестов хватит времени.
+        let nanos = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
+        std::array::from_fn(|i| (nanos >> ((i % 16) * 8)) as u8)
     }
 }
 

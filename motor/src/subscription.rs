@@ -90,7 +90,9 @@ pub fn fetch(url: &Secret) -> Result<Fetched, FetchError> {
 /// Разобрать тело подписки: обычный список ссылок или он же в base64.
 pub fn parse(body: &str) -> Result<Vec<Entry>, ImportError> {
     let text = decode_body(body)?;
-    let lines: Vec<&str> = text.lines().map(str::trim).filter(|l| !l.is_empty()).collect();
+    // Строки с «#» в начале — комментарии (открытые списки пишут так заголовок: дата,
+    // название, количество). Это не серверы — раньше они попадали в список «сломанными».
+    let lines: Vec<&str> = text.lines().map(str::trim).filter(|l| !l.is_empty() && !l.starts_with('#')).collect();
     if lines.len() > MAX_ENTRIES {
         return Err(malformed(t!("sub.too_many_lines", max = MAX_ENTRIES)));
     }

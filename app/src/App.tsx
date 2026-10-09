@@ -340,6 +340,14 @@ export default function App() {
         if (first) setServerKey(first.key);
       }
     },
+    // С телефона: мотор уже добавил источник — показываем; первый — сразу выбираем его сервер.
+    onPhoneAdded: (added: Source) => {
+      setSources((current) => (current?.some((x) => x.id === added.id) ? current : [...(current ?? []), added]));
+      if (!server) {
+        const first = added.servers.find((x) => !x.problem);
+        if (first) setServerKey(first.key);
+      }
+    },
     onRefresh: async (id: string) => replaceSource(await backend.refreshSource(id)),
     onRename: async (id: string, name: string) => replaceSource(await backend.renameSource(id, name)),
     onProbe: async (id: string) => {

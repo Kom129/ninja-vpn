@@ -2,11 +2,12 @@
 // Источник можно добавить, обновить, переименовать и удалить; серверы сгруппированы как у сервиса.
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { ChevronDown, ChevronsDownUp, ChevronsUpDown, EllipsisVertical, Gauge, KeyRound, Link2, Plus, RefreshCw, X } from 'lucide-react';
+import { ChevronDown, ChevronsDownUp, ChevronsUpDown, EllipsisVertical, Gauge, KeyRound, Link2, Plus, RefreshCw, X, Smartphone } from 'lucide-react';
 import type { ProbeResult, Server, Source } from '../api';
 import { COUNTRIES, parseServerName, transportOf } from '../names';
 import { useI18n, type I18n } from '../i18n';
 import { Flag } from './Flag';
+import { PhonePairDialog } from './PhonePair';
 
 interface Props {
   sources: Source[] | null;
@@ -19,6 +20,8 @@ interface Props {
   selectLocked: boolean;
   onSelect(key: string): void;
   onAdd(name: string | null, link: string): Promise<void>;
+  /** С телефона пришёл ключ (уже добавлен мотором) — показать его в списке. */
+  onPhoneAdded(source: Source): void;
   onRefresh(id: string): Promise<void>;
   onRename(id: string, name: string): Promise<void>;
   onRemove(id: string): Promise<void>;
@@ -93,6 +96,7 @@ export function ServerPanel(props: Props) {
   };
   const ids = sources?.map((s) => s.id) ?? [];
   const allCollapsed = ids.length > 0 && ids.every((id) => collapsed.has(id));
+  const [phoneOpen, setPhoneOpen] = useState(false);
   const toggle = (id: string) => {
     const next = new Set(collapsed);
     if (next.has(id)) next.delete(id);
@@ -145,11 +149,17 @@ export function ServerPanel(props: Props) {
         {adding ? (
           <AddForm onAdd={props.onAdd} onDone={() => setAdding(false)} />
         ) : (
-          <button className="add" onClick={() => setAdding(true)}>
-            <Plus size={18} strokeWidth={1.6} /> {t('panel.add')}
-          </button>
+          <>
+            <button className="add" onClick={() => setAdding(true)}>
+              <Plus size={18} strokeWidth={1.6} /> {t('panel.add')}
+            </button>
+            <button className="add phone-add" onClick={() => setPhoneOpen(true)}>
+              <Smartphone size={17} strokeWidth={1.6} /> {t('phone.button')}
+            </button>
+          </>
         )}
       </div>
+      {phoneOpen && <PhonePairDialog onAdded={props.onPhoneAdded} onClose={() => setPhoneOpen(false)} />}
     </aside>
   );
 }
@@ -253,7 +263,9 @@ function SourceSection({
           </button>
         )}
         {/* Пока переименовываем — значок и «⋮» прячем: в узкой панели они съедали поле ввода. */}
-        {mode !== 'rename' && <span className="badge">{source.kind === 'key' ? t('panel.key') : t('panel.subscription')}</span>}
+        {mode !== 'rename' && (
+          <span className="badge">{source.kind === 'key' ? t('panel.key') : t('panel.subscription')}</span>
+        )}
         {busy && <RefreshCw size={15} className="spin" aria-label={t('panel.updating')} />}
         {mode !== 'rename' && (
           <button className="icon-btn small" aria-label={t('panel.actions', { name: source.name })} aria-expanded={menu} onClick={() => setMenu(!menu)}>

@@ -498,6 +498,16 @@ mod tests {
     }
 
     #[test]
+    fn comment_lines_are_not_servers() {
+        let store = temp_store("comments");
+        // Заголовок с комментариями — так пишут многие открытые списки.
+        let body = format!("# profile-title: LIST\n# profile-update-interval: 1\n\n{}\n{}", key("a.example.com"), key("b.example.com"));
+        let info = store.import_cached(Some("Список"), "https://sub.example.com/list.txt", &body, None, None).unwrap();
+        assert_eq!(store.entries(&info.id).unwrap().len(), 2, "строки «#…» — не серверы");
+        let _ = fs::remove_dir_all(&store.dir);
+    }
+
+    #[test]
     fn servers_have_stable_keys_and_can_be_found() {
         let store = temp_store("keys");
         // Два сервера с одинаковым именем «Свой» и один сломанный.

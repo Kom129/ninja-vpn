@@ -743,3 +743,20 @@ html:lang(fa) { --font: "Segoe UI", Tahoma, sans-serif; --font-display: "Segoe U
 [dir="rtl"] .auto-switch { right: auto; left: 12px; }
 [dir="rtl"] .auto-switch[aria-checked="true"] .knob { transform: translateX(-12px); }
 [dir="rtl"] .auto-switch .knob { left: auto; right: 2px; }
+
+
+/* «С телефона»: QR-код страницы в домашней сети. */
+.phone-add { margin-top: 8px; padding: 8px 14px; font-size: 14px; }
+.phone-dialog { width: min(560px, calc(100vw - 48px)); }
+.phone-body { display: flex; gap: 18px; align-items: center; margin: 12px 0 8px; }
+.phone-qr { flex-shrink: 0; width: 232px; height: 232px; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 6px 18px rgb(var(--shade-a) / calc(0.14 * var(--shade-k))); }
+.phone-qr svg { display: block; width: 100%; height: 100%; }
+.phone-steps ol { margin: 0 0 10px; padding-left: 20px; font-size: 14px; }
+.phone-steps li + li { margin-top: 6px; }
+.phone-url { font-family: Consolas, "Cascadia Mono", monospace; color: var(--ink-soft); user-select: text; word-break: break-all; }
+.phone-waiting { margin: 4px 0; font-size: 13px; color: var(--muted); }
+.phone-added { margin: 4px 0; padding: 0; list-style: none; font-size: 14px; color: var(--good-ink); }
+.phone-added li { display: flex; align-items: center; gap: 6px; }
+.phone-notes { margin: 8px 0 12px; }
+[dir="rtl"] .phone-steps ol { padding-left: 0; padding-right: 20px; }
+[dir="rtl"] .phone-url { direction: ltr; unicode-bidi: plaintext; }

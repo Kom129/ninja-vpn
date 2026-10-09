@@ -1,6 +1,6 @@
 [package]
 name = "ninja-vpn"
-version = "1.0.1"
+version = "1.2.1"
 description = "ninja-vpn — VPN-клиент со стеклянным окном и ниндзя"
 authors = ["KOM"]
 edition = "2024"

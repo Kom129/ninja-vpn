@@ -33,12 +33,13 @@
 - **Скорость всех серверов** одной кнопкой, **резерв** (если сервер не ответил — пробует похожий), **переподключение** при обрыве.
 - **Смена страны на лету** — выбрали другую в «Профилях», и программа переключилась сама, без «Отключить».
 - **Другой VPN**: если включён ещё один VPN на весь компьютер, программа предупредит и не даст им сломать интернет друг другу.
+- **Ключ с телефона по QR-коду:** ключ пришёл на телефон — наведите камеру на QR-код в программе, вставьте ключ на открывшейся странице, и он появится на компьютере. Только по вашему Wi-Fi, без чужих серверов; страница защищена одноразовым секретом и живёт, пока открыто окно.
 - **Светлая и тёмная тема**, «как в Windows».
 - **7 языков**: русский, English, Español, Português, Türkçe, 中文, فارسی (справа налево).
 
 ## Как пользоваться
 
-1. «Профили» → **«+ Добавить подписку или ключ»** → вставьте ссылку.
+1. «Профили» → **«+ Добавить подписку или ключ»** → вставьте ссылку. Ключ на телефоне? Нажмите **«С телефона по QR-коду»** и отсканируйте код.
 2. Выберите сервер (кнопка со спидометром проверит скорость всех).
 3. Выберите режим внизу и нажмите **«Подключить»**.
 
@@ -81,7 +82,7 @@
 
 **ninja-vpn is a client only — it has no servers.** You need your own subscription or `vless://` key from a VPN service or your own server. Use it in accordance with your local laws.
 
-**Features:** Device mode (whole PC via TUN), Apps mode (only these apps / all except these, with a live “is it really going through the VPN” watcher), Browser mode (your usual Chrome/Edge/Yandex/Brave profile with bookmarks and passwords); VLESS over TCP, WebSocket, gRPC, HTTPUpgrade, HTTP/2 and XHTTP with TLS or REALITY; an honest “Connected” only after data actually went through the server; speed test of all servers, fallback servers, auto-reconnect, switching servers on the fly; a warning if another whole-PC VPN is on; light and dark themes; 7 languages.
+**Features:** Device mode (whole PC via TUN), Apps mode (only these apps / all except these, with a live “is it really going through the VPN” watcher), Browser mode (your usual Chrome/Edge/Yandex/Brave profile with bookmarks and passwords); VLESS over TCP, WebSocket, gRPC, HTTPUpgrade, HTTP/2 and XHTTP with TLS or REALITY; an honest “Connected” only after data actually went through the server; speed test of all servers, fallback servers, auto-reconnect, switching servers on the fly; sending a key from your phone by scanning a QR code (over your Wi-Fi only, protected by a one-time secret); a warning if another whole-PC VPN is on; light and dark themes; 7 languages.
 
 **Privacy:** subscriptions and keys stay on your PC, encrypted with Windows DPAPI. No telemetry. The app only talks to your subscription URL, your VPN servers and — through the VPN — connectivity-check sites (Cloudflare and `ipinfo.io` for the exit country, Google `generate_204`, a 64 KB test download from Cloudflare, Hetzner or CacheFly). In Device mode DNS goes through the VPN to Cloudflare `1.1.1.1` (DoH).
 

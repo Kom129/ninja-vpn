@@ -179,6 +179,11 @@ ull — передумали. */
   onAttempt(callback: (a: AttemptInfo) => void): Promise<() => void>;
   /** Windows спрашивает разрешение администратора (режим «все, кроме этих»). */
   onElevation(callback: (waiting: boolean) => void): Promise<() => void>;
+  /** Открыть страницу «ключ с телефона» в домашней сети: адрес и QR-код (SVG). */
+  pairStart(): Promise<{ url: string; qrSvg: string }>;
+  pairStop(): Promise<void>;
+  /** С телефона пришёл ключ или подписка — уже добавлены как источник. */
+  onPairAdded(callback: (source: Source) => void): Promise<() => void>;
   minimize(): void;
   toggleMaximize(): void;
   close(): void;
@@ -221,6 +226,9 @@ function tauriBackend(): Backend {
     onState: (callback) => listen<VpnState>('vpn-state', (e) => callback(e.payload)),
     onAttempt: (callback) => listen<AttemptInfo>('vpn-attempt', (e) => callback(e.payload)),
     onElevation: (callback) => listen<boolean>('vpn-elevation', (e) => callback(e.payload)),
+    pairStart: () => invoke('pair_start'),
+    pairStop: () => invoke('pair_stop'),
+    onPairAdded: (callback) => listen<Source>('pair-added', (e) => callback(e.payload)),
     minimize: () => void win.minimize(),
     toggleMaximize: () => void win.toggleMaximize(),
     close: () => void win.close(),
@@ -251,6 +259,8 @@ function demoBackend(): Backend {
   const listeners = new Set<(s: VpnState) => void>();
   const attemptListeners = new Set<(a: AttemptInfo) => void>();
   let timers: number[] = [];
+  let pairTimer = 0;
+  const pairListeners = new Set<(s: Source) => void>();
   // Демо: обычный браузер уже открыт напрямую — видно предложение перезапуска.
   let demoBrowser: BrowserRun = 'direct';
   const send = (s: VpnState) => {
@@ -415,6 +425,25 @@ function demoBackend(): Backend {
       return () => void attemptListeners.delete(own);
     },
     onElevation: async () => () => {},
+    // Демо: вместо настоящего QR — рамка; через 4 с «телефон» присылает ключ.
+    pairStart: async () => {
+      window.clearTimeout(pairTimer);
+      pairTimer = window.setTimeout(() => {
+        const id = 'phone' + (sources.length + 1);
+        const added: Source = { id, name: 'С телефона', kind: 'key', hint: 'vless · phone.example.com', updated: Date.now() / 1000, servers: demoServers(id, [['Finland 🇫🇮', 'VLESS · TCP · REALITY', 'sing-box 1.14.2']]) };
+        sources = [...sources, added];
+        pairListeners.forEach((l) => l(added));
+      }, 4000);
+      return {
+        url: 'http://192.168.1.20:52814/p/demo',
+        qrSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" width="232" height="232"><rect width="29" height="29" fill="#fff"/><path d="M2 2h7v7H2zM20 2h7v7h-7zM2 20h7v7H2z" fill="none" stroke="#14283a" stroke-width="1.6"/><text x="14.5" y="16" font-size="3" text-anchor="middle" fill="#14283a">ДЕМО</text></svg>',
+      };
+    },
+    pairStop: async () => window.clearTimeout(pairTimer),
+    onPairAdded: async (callback) => {
+      pairListeners.add(callback);
+      return () => pairListeners.delete(callback);
+    },
     minimize: () => {},
     toggleMaximize: () => {},
     close: () => {},

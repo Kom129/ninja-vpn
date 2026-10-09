@@ -2094,11 +2094,12 @@ checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
 
 [[package]]
 name = "ninja-motor"
-version = "1.0.1"
+version = "1.2.1"
 dependencies = [
  "base64 0.23.1",
  "percent-encoding",
  "png 0.18.1",
+ "qrcode",
  "serde",
  "serde_json",
  "thiserror 2.0.21",
@@ -2109,7 +2110,7 @@ dependencies = [
 
 [[package]]
 name = "ninja-vpn"
-version = "1.0.1"
+version = "1.2.1"
 dependencies = [
  "ninja-motor",
  "serde",
@@ -2660,6 +2661,12 @@ checksum = "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
 dependencies = [
  "unicode-ident",
 ]
+
+[[package]]
+name = "qrcode"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d68782463e408eb1e668cf6152704bd856c78c5b6417adaee3203d8f4c1fc9ec"
 
 [[package]]
 name = "quick-xml"
