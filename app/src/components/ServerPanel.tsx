@@ -1,7 +1,7 @@
 // Выдвижная панель «Профили»: источники (подписки и ключи) и их серверы.
 // Источник можно добавить, обновить, переименовать и удалить; серверы сгруппированы как у сервиса.
 
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { ChevronDown, ChevronsDownUp, ChevronsUpDown, EllipsisVertical, Gauge, KeyRound, Link2, Plus, RefreshCw, X } from 'lucide-react';
 import type { ProbeResult, Server, Source } from '../api';
 import { COUNTRIES, parseServerName, transportOf } from '../names';
@@ -172,6 +172,11 @@ function SourceSection({
   const { t } = i18n;
   const [menu, setMenu] = useState(false);
   const [mode, setMode] = useState<'view' | 'rename' | 'remove'>('view');
+  // Переименование: старое имя сразу выделено — новое печатается поверх.
+  const renameInput = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (mode === 'rename') renameInput.current?.select();
+  }, [mode]);
   const [name, setName] = useState(source.name);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
@@ -228,7 +233,15 @@ function SourceSection({
               run(() => onRename(source.id, name));
             }}
           >
-            <input value={name} onChange={(e) => setName(e.target.value)} maxLength={64} autoFocus aria-label={t('panel.newName')} />
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Escape' && setMode('view')}
+              ref={renameInput}
+              maxLength={64}
+              autoFocus
+              aria-label={t('panel.newName')}
+            />
             <button type="submit" disabled={busy || !name.trim()}>OK</button>
             <button type="button" onClick={() => setMode('view')}>{t('btn.cancel')}</button>
           </form>
@@ -239,11 +252,14 @@ function SourceSection({
             <span className="source-name">{source.name}</span>
           </button>
         )}
-        <span className="badge">{source.kind === 'key' ? t('panel.key') : t('panel.subscription')}</span>
+        {/* Пока переименовываем — значок и «⋮» прячем: в узкой панели они съедали поле ввода. */}
+        {mode !== 'rename' && <span className="badge">{source.kind === 'key' ? t('panel.key') : t('panel.subscription')}</span>}
         {busy && <RefreshCw size={15} className="spin" aria-label={t('panel.updating')} />}
-        <button className="icon-btn small" aria-label={t('panel.actions', { name: source.name })} aria-expanded={menu} onClick={() => setMenu(!menu)}>
-          <EllipsisVertical size={18} strokeWidth={1.6} />
-        </button>
+        {mode !== 'rename' && (
+          <button className="icon-btn small" aria-label={t('panel.actions', { name: source.name })} aria-expanded={menu} onClick={() => setMenu(!menu)}>
+            <EllipsisVertical size={18} strokeWidth={1.6} />
+          </button>
+        )}
         {menu && (
           <div className="menu source-menu" role="menu">
             {source.kind === 'subscription' && (
