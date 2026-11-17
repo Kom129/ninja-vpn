@@ -1,0 +1,37 @@
+name: Test and build Ninja VPN for Windows
+on:
+  push:
+    branches: [fix/codex-app-routing]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Download the pinned VPN engines
+        shell: pwsh
+        run: ./scripts/fetch-engines.ps1
+      - name: Install frontend dependencies
+        working-directory: app
+        run: npm ci
+      - name: Build the interface
+        working-directory: app
+        run: npm run build
+      - name: Test the Windows backend
+        run: cargo test --locked --workspace
+      - name: Create the Windows installer
+        working-directory: app
+        run: npm run tauri -- build --bundles nsis -- --locked
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ninja-vpn-windows-x64
+          path: |
+            target/release/ninja-vpn.exe
+            target/release/bundle/nsis/*-setup.exe
+          if-no-files-found: error
